@@ -1,0 +1,71 @@
+`timescale 1ns / 1ps 
+module tb_mips_single_cycle(); 
+reg clk; 
+reg rst; 
+wire [15:0] ALU_out; 
+wire [3:0] ALUOp; 
+wire [15:0] Read_data1; 
+wire [15:0] Read_data2; 
+wire [15:0] sign_ext_immediate; 
+wire [3:0] rs, rt, rd; 
+mips_single_cycle uut ( 
+.clk(clk), 
+.rst(rst), 
+.ALU_out(ALU_out), 
+.ALUOp(ALUOp), 
+.Read_data1(Read_data1), 
+.Read_data2(Read_data2), 
+.sign_ext_immediate(sign_ext_immediate), 
+.rs(rs), 
+.rt(rt), 
+.rd(rd) 
+); 
+initial clk = 0; 
+  always #5 clk = ~clk; 
+ 
+  initial begin 
+    rst = 1; 
+    #15; 
+    rst = 0; 
+  end 
+ 
+ 
+  initial begin 
+    $display("Time | Op   | R1 | R2 | Imm | ALU_Out | WR_Reg | 
+WR_Data"); 
+    $display("-------------------------------------------------------------"); 
+    forever @(posedge clk) begin 
+      $write("%5t | ", $time); 
+      case (ALUOp) 
+        4'b0000: $write("ADD  "); 
+        4'b0001: $write("SUB  "); 
+        4'b0010: $write("ADDI "); 
+        4'b0011: $write("LW   "); 
+        4'b0100: $write("SW   "); 
+        4'b0101: $write("JUMP "); 
+        4'b0110: $write("XOR  "); 
+        4'b0111: $write("OR   "); 
+        default: $write("UNK  "); 
+      endcase 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+      // Use $signed to print signed values properly 
+      $display("| %4d | %4d | %5d |   %2d   | %6d", 
+               $signed(Read_data1), 
+               $signed(Read_data2), 
+               $signed(uut.sign_ext_immediate), 
+               uut.Write_reg, 
+               $signed(uut.Write_data)); 
+    end 
+  end 
+  initial begin 
+    #300; 
+    $finish; 
+  end 
+endmodule
